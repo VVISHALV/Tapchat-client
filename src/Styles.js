@@ -20,7 +20,6 @@ const Container=styled.div`
 position: absolute;
 left:0px;
 width:100%;
-max-width: 100%;
 height:100%;
 background-color:black;
 display: flex;
@@ -37,7 +36,6 @@ flex-direction: column;
 align-items: center;
 gap: 0.2em;
 border-radius: 1px;
-position: relative;
 .scroll{
   overflow: auto;
   width: 100%;

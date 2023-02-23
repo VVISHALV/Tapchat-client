@@ -14,7 +14,7 @@ const socket = io(dev, {
 });
 console.log("usesocket rendered");
 let User;
-function useSocket(setMessages, selectedContact) {
+function useSocket(selectedContact) {
   //   const [isConnected, setIsConnected] = useState(false);
   useEffect(() => {
     socket.on("connect", () => {
@@ -30,10 +30,7 @@ function useSocket(setMessages, selectedContact) {
       });
     });
 
-    socket.on("convo", (msg) => {
-      setMessages(msg);
-      console.log("convo", msg);
-    });
+    
     socket.on("disconnect", () => {
       //   setIsConnected(false);
     });
@@ -41,11 +38,27 @@ function useSocket(setMessages, selectedContact) {
     return () => {
       socket.off("connect");
       socket.off("disconnect");
-      socket.off("convo");
     };
   }, []);
 
   return socket;
 }
-
+function SocketSetMessage(setMessages,states){
+  
+    const socket=states.socket;
+    socket.on("convo", (msg) => {
+      setMessages(msg);
+      console.log("convo", msg);
+    });
+    socket.on("chat", (msg) => {
+      if (
+        msg.sender_email == states.selectedContact.email ||
+        msg.sender_email == states.user.email
+      )
+        setMessages((m) => [...m, msg]);
+      console.log("server", msg);
+    });
+    return socket;
+}
 export default useSocket;
+export {SocketSetMessage}

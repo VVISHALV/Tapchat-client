@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 import {
   Profilepic,
   Header,
@@ -12,11 +14,23 @@ import {
 import { BsEmojiLaughing } from "react-icons/bs";
 import { IoSend } from "react-icons/io5";
 import { useRef } from "react";
-
+import { randomimg } from "./utils.js";
+import { SocketSetMessage } from "./useSocket.js";
 export default function RightSide(props) {
+  console.log("rightside component");
   const states = props.states;
   const textfield = useRef();
   const lastmessage = useRef();
+  const [messages, setMessages] = useState([]);
+   
+  useEffect(() => {
+    const socket=SocketSetMessage(setMessages,states);
+    return ()=>{
+      socket.off("convo");
+      socket.off("chat");
+
+    }
+  }, [states.selectedContact]);
 
   function handleSend(e) {
     const msg = textfield.current.value;
@@ -37,11 +51,6 @@ export default function RightSide(props) {
       block: "center",
     });
   }
-  function randomimg() {
-    return `https://picsum.photos/seed/picsum/100/${Math.floor(
-      Math.random() * 500
-    )}`;
-  }
 
   return (
     <MessageArea>
@@ -50,7 +59,7 @@ export default function RightSide(props) {
         <h2>{states.selectedContact.name}</h2>
       </Header>
       <ChatArea>
-        {states.messages.map((m, i) => (
+        {messages.map((m, i) => (
           <Message key={i} mine={m.sender == states.user.name}>
             <p>{m.sender == states.user.name ? "me" : m.sender}</p>
             <h2>{m.message}</h2>

@@ -9,40 +9,37 @@ import { contacts } from "./Loginpage.js";
 import useSocket from "./useSocket.js";
 
 function App() {
-  const [messages, setMessages] = useState([]);
+  console.log("app component");
   const [selectedContact, setSelectedContact] = useState("");
   const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("user")));
-  const user_contacts = contacts.filter((c) => c.email != user.email);
-  const [display_contacts, setDisplay_contacts] = useState([...user_contacts]);
-  console.log(selectedContact);
+  const [user_contacts,setUser_contacts] = useState(contacts.filter((c) => c.email != user.email));
+  console.log("sel",selectedContact);
 
-  const socket = useSocket(setMessages, selectedContact);
+  const socket = useSocket(selectedContact);
   const states = {
     socket,
-    messages,
-    setMessages,
     selectedContact,
     setSelectedContact,
     user,
     setUser,
-    display_contacts,
-    setDisplay_contacts,
     user_contacts,
   };
   // console.log(messages)
-  useEffect(() => {
-    socket.on("chat", (msg) => {
-      if (
-        msg.sender_email == selectedContact.email ||
-        msg.sender_email == user.email
-      )
-        setMessages((m) => [...m, msg]);
-      console.log("server", msg);
-    });
-    return () => {
-      socket.off("chat");
-    };
-  }, [selectedContact]);
+  useEffect(()=>{
+    
+    socket.on("online",(email)=>{
+      console.log("online",email);
+       console.log(user_contacts); 
+      setUser_contacts((uc)=>uc.map((c)=>{
+        console.log(c);
+        if(c.email==email)return {...c,isonline:true}
+        else return c;
+      }))
+    })
+    return ()=>{
+      socket.off("online")
+    }
+},[])  
 
   return (
     <>

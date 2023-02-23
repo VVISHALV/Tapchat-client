@@ -13,7 +13,8 @@ let contacts=[
   contacts=contacts.map(d=>{
     return {
       name:d,
-      email:d+"@gmail.com"
+      email:d+"@gmail.com",
+      isonline:false
     }
   })
 export {contacts};

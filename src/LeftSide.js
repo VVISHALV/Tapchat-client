@@ -1,3 +1,5 @@
+import { useState,useEffect } from "react";
+
 import { IoSearch } from "react-icons/io5";
 import {
   Search,
@@ -8,54 +10,18 @@ import {
 } from "./Styles.js";
 import { Navigate } from "react-router-dom";
 
-export default function LeftSide(props) {
-  const states = props.states;
-  function signout() {
-    sessionStorage.removeItem("user");
-    states.setUser(null);
-    window.google.accounts.id.revoke(states.user.email, (done) => {
-      console.log(done);
-    });
-  }
-  function handleAddContact() {
-    let val = document.querySelector("#addcontact").value;
-    console.log(val);
-    postdata("contact", {
-      user_name: states.user.name,
-      user_email: states.user.email,
-      contact_name: val,
-    });
-  }
-  function postdata(path, data) {
-    fetch("http://localhost:3001/" + path, {
-      method: "POST",
-      mode: "cors",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((r) => r.json())
-      .then((r) => console.log(r));
-  }
-  function handleContact(e) {
-    states.socket.emit("contact", {
-      sender_email: states.user.email,
-      receiver_email: e.email,
-    });
-    states.setSelectedContact(e);
-  }
-  function handleSearch(e) {
-    states.setDisplay_contacts(
-      states.contacts.filter((v) => v.name.startsWith(e.target.value))
-    );
-  }
-  function randomimg() {
-    return `https://picsum.photos/seed/picsum/100/${Math.floor(
-      Math.random() * 500
-    )}`;
-  }
+import {signout,handleAddContact,handleSearch,handleContact,randomimg} from "./utils.js"
 
+export default function LeftSide(props) {
+  console.log("leftside component");
+  const states = props.states;
+ 
+  const user_contacts=states.user_contacts;
+  const [display_contacts, setDisplay_contacts] = useState([...states.user_contacts]);
+  useEffect(()=>{
+    setDisplay_contacts(user_contacts)
+  },[user_contacts])
+ 
   return (
     <ContactsContainer>
       {!states.user && <Navigate to="/" />}
@@ -66,7 +32,7 @@ export default function LeftSide(props) {
           type="button"
           value="signout"
           onClick={() => {
-            signout();
+            signout(states.user,states.setUser);
             states.setUser(null);
           }}
         />
@@ -77,17 +43,17 @@ export default function LeftSide(props) {
         </button> */}
       <Search>
         <IoSearch size={25} />
-        <input type="text" placeholder="Search chat" onInput={handleSearch} />
+        <input type="text" placeholder="Search chat" onInput={(e)=>handleSearch(e,{user_contacts,setDisplay_contacts})} />
       </Search>
       <div className="scroll">
-        {states.display_contacts.map((d, i) => (
+        {display_contacts.map((d, i) => (
           <Contact
             key={i}
-            onClick={() => handleContact(d)}
+            onClick={() => handleContact(d,states)}
             selected={states.selectedContact == d}
           >
             <Profilepic src={randomimg()} />
-            <h2>{d.name}</h2>
+            <h2>{d.name}:{d.isonline?"yes":"no"}</h2>
           </Contact>
         ))}
       </div>
